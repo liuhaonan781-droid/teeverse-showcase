@@ -591,10 +591,6 @@ video {
   bottom: 1rem;
 }
 
-.bottom-\[calc\(100\%\+6px\)\] {
-  bottom: calc(100% + 6px);
-}
-
 .left-0 {
   left: 0px;
 }
@@ -647,10 +643,6 @@ video {
   z-index: 2;
 }
 
-.z-\[3\] {
-  z-index: 3;
-}
-
 .z-\[60\] {
   z-index: 60;
 }
@@ -665,10 +657,6 @@ video {
 
 .mb-6 {
   margin-bottom: 1.5rem;
-}
-
-.mt-6 {
-  margin-top: 1.5rem;
 }
 
 .block {
@@ -1335,10 +1323,6 @@ video {
 
   .md\:mb-8 {
     margin-bottom: 2rem;
-  }
-
-  .md\:mt-8 {
-    margin-top: 2rem;
   }
 
   .md\:h-10 {
@@ -23108,8 +23092,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
           </div>
 
-          {/* 款式指示点 */}
-          <div className="mt-6 flex items-center justify-center gap-2 md:mt-8">
+        </main>
+
+        {/* ===== 底部交互区：fixed 贴底居中，从上到下 = 指示点 → 4K 加载提示 → 切换按钮 ===== */}
+        <div className="fixed bottom-4 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-2 md:bottom-5 md:gap-2.5">
+          {/* 款式指示点（最上层） */}
+          <div className="flex items-center justify-center gap-2">
             {PRODUCTS.map((p, i) => (
               <button
                 key={p.name}
@@ -23123,37 +23111,35 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
               />
             ))}
           </div>
-        </main>
-
-        {/* ===== 切换款式按钮组：fixed 固定贴底居中，4K 加载提示紧贴其上方 ===== */}
-        <div className="fixed bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 md:bottom-5">
+          {/* 4K 加载提示（指示点下方、按钮上方） */}
           {videoLoading && (
-            <div className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[3] -translate-x-1/2">
-              <span className="loading-hint block whitespace-nowrap rounded-full bg-black/50 px-3 py-1 text-xs text-white/70 backdrop-blur-sm">
-                正在载入 4K 影片…
-              </span>
-            </div>
+            <span className="loading-hint block whitespace-nowrap rounded-full bg-black/50 px-3 py-1 text-xs text-white/70 backdrop-blur-sm">
+              正在载入 4K 影片…
+            </span>
           )}
-          <button
-            type="button"
-            aria-label="上一款式"
-            onClick={() => goProduct(-1)}
-            disabled={!!anim}
-            className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center rounded-full px-4 py-2.5 text-white sm:px-6 sm:py-3 disabled:cursor-wait disabled:opacity-60"
-            style={{ animationDelay: '800ms' }}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            type="button"
-            aria-label="下一款式"
-            onClick={() => goProduct(1)}
-            disabled={!!anim}
-            className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center rounded-full px-4 py-2.5 text-white sm:px-6 sm:py-3 disabled:cursor-wait disabled:opacity-60"
-            style={{ animationDelay: '900ms' }}
-          >
-            <ChevronRight size={18} />
-          </button>
+          {/* 切换按钮组（最底层） */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="上一款式"
+              onClick={() => goProduct(-1)}
+              disabled={!!anim}
+              className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center rounded-full px-4 py-2.5 text-white sm:px-6 sm:py-3 disabled:cursor-wait disabled:opacity-60"
+              style={{ animationDelay: '800ms' }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label="下一款式"
+              onClick={() => goProduct(1)}
+              disabled={!!anim}
+              className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center rounded-full px-4 py-2.5 text-white sm:px-6 sm:py-3 disabled:cursor-wait disabled:opacity-60"
+              style={{ animationDelay: '900ms' }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
         {/* ===== Toast 提示（右下角，与底部切换按钮组同一水平线） ===== */}
