@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08090c" />
+  <link rel="icon" type="image/svg+xml" href="assets/teeverse-logo-mark-approved-v1.svg" />
+  <link rel="apple-touch-icon" href="assets/teeverse-logo-mark-approved-v1.png" />
+  <title>TEEVERSE CUSTOM LAB · 定制你的短袖</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script>window.react = window.React;</script>
+  <script src="https://unpkg.com/lucide-react@0.441.0/dist/umd/lucide-react.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html,body,#root { margin:0; min-height:100%; }
+    body { background:#07080b; color:#fff; font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; overflow:hidden; }
+    button,input,select { font:inherit; }
+    button { -webkit-tap-highlight-color:transparent; }
+    button:active { transform:scale(.97); }
+    .workspace-bg { background:#000; }
+    .workspace-bg::before { content:''; position:fixed; inset:0; z-index:1; pointer-events:none; background:rgba(0,0,0,.38); }
+    .bottom-blur-mask { position:fixed; inset:0; z-index:2; pointer-events:none; -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); -webkit-mask-image:linear-gradient(to top,black 0%,transparent 45%); mask-image:linear-gradient(to top,black 0%,transparent 45%); }
+    .liquid-glass,.glass,.glass-soft {
+      position:relative; overflow:hidden; border:0; background:rgba(255,255,255,.01);
+      mix-blend-mode:luminosity; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.1),0 18px 60px rgba(0,0,0,.2);
+    }
+    .glass { background:rgba(5,7,11,.24); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+    .glass-soft { background:rgba(255,255,255,.018); }
+    .liquid-glass::before,.glass::before,.glass-soft::before {
+      content:'';position:absolute;inset:0;border-radius:inherit;padding:1.4px;pointer-events:none;
+      background:linear-gradient(to bottom,rgba(255,255,255,.45) 0%,rgba(255,255,255,.15) 20%,rgba(255,255,255,0) 40%,rgba(255,255,255,0) 60%,rgba(255,255,255,.15) 80%,rgba(255,255,255,.45) 100%);
+      -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;
+      mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;
+    }
+    .active-glass { background:rgba(218,235,255,.105)!important; box-shadow:inset 0 1px 1px rgba(255,255,255,.24),0 0 28px rgba(157,211,255,.08)!important; }
+    .range { appearance:none; width:100%; height:4px; border-radius:999px; background:rgba(255,255,255,.12); outline:none; }
+    .range::-webkit-slider-thumb { appearance:none; width:16px; height:16px; border-radius:50%; background:linear-gradient(145deg,#fff,#b8dfff); box-shadow:0 0 0 4px rgba(185,222,255,.12),0 3px 9px rgba(0,0,0,.35); cursor:pointer; }
+    .stage-shadow { filter:drop-shadow(0 32px 38px rgba(0,0,0,.45)); }
+    .fabric { filter:url(#fabricTexture); }
+    .print-zone {
+      border:0;
+      box-shadow:none;
+      clip-path:polygon(22.9% 7.1%,36.9% 0%,40.7% 6.2%,44.4% 9%,50% 9%,55.6% 9%,59.3% 6.2%,63.1% 0%,77.1% 7.1%,100% 25.5%,84.6% 44.1%,75.2% 37.2%,75.2% 100%,24.8% 100%,24.8% 37.2%,15.4% 44.1%,0% 25.5%);
+      -webkit-clip-path:polygon(22.9% 7.1%,36.9% 0%,40.7% 6.2%,44.4% 9%,50% 9%,55.6% 9%,59.3% 6.2%,63.1% 0%,77.1% 7.1%,100% 25.5%,84.6% 44.1%,75.2% 37.2%,75.2% 100%,24.8% 100%,24.8% 37.2%,15.4% 44.1%,0% 25.5%);
+    }
+    .design-guide { background:rgba(181,229,255,.045); box-shadow:inset 0 0 42px rgba(190,218,255,.055); }
+    .property-panel { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.16) transparent; }
+    .property-panel::-webkit-scrollbar { width:5px; }
+    .property-panel::-webkit-scrollbar-track { background:transparent; }
+    .property-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,.14); border-radius:999px; }
+    .layer-item { touch-action:none; user-select:none; cursor:grab; }
+    .layer-item:active { cursor:grabbing; }
+    @keyframes toastIn { from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none} }
+    .toast-in { animation:toastIn .28s ease-out forwards; }
+    @keyframes blurFadeUp { from{opacity:0;filter:blur(20px);transform:translateY(40px)} to{opacity:1;filter:blur(0);transform:translateY(0)} }
+    .panel-in { opacity:0; animation:blurFadeUp 1s ease-out forwards; }
+    @keyframes arrivalVeil { 0%{opacity:1;backdrop-filter:blur(28px)} 55%{opacity:1;backdrop-filter:blur(8px)} 100%{opacity:0;backdrop-filter:blur(0)} }
+    @keyframes arrivalCore { 0%{opacity:1;transform:scale(12);filter:blur(2px)} 58%{opacity:.92;transform:scale(1);filter:blur(0)} 100%{opacity:0;transform:scale(.72);filter:blur(15px)} }
+    @keyframes arrivalLogo { 0%{opacity:0;transform:scale(1.08);filter:blur(14px)} 30%{opacity:1;transform:scale(1);filter:blur(0)} 76%{opacity:1} 100%{opacity:0;transform:scale(.94);filter:blur(9px)} }
+    .arrival-veil { animation:arrivalVeil 1.05s cubic-bezier(.4,0,.2,1) forwards; }
+    .arrival-core { animation:arrivalCore 1.05s cubic-bezier(.4,0,.2,1) forwards; }
+    .arrival-logo { animation:arrivalLogo 1.05s cubic-bezier(.22,1,.36,1) forwards; }
+    .canvas-panel { background:rgba(3,5,8,.18); }
+    .tool-panel,.property-panel { background:rgba(5,7,10,.25); }
+    .top-cinema { background:rgba(0,0,0,.08); }
+    .bottom-actions { background:rgba(0,0,0,.12)!important; }
+    @media (max-height:700px) and (min-width:1024px){
+      .desktop-shell{min-height:100vh!important}
+      .top-cinema,.bottom-actions{height:64px!important}
+      .custom-grid{padding-top:10px!important;padding-bottom:10px!important}
+      .canvas-panel>div:nth-of-type(3){min-height:0!important;padding-top:50px!important;padding-bottom:32px!important}
+      .stage-wrap{width:min(56vh,500px)!important}
+      .tool-list{gap:3px!important}
+      .tool-list>button{padding-top:9px!important;padding-bottom:9px!important}
+    }
+    @media (max-width:1023px){ body{overflow:auto}.desktop-shell{height:auto!important;min-height:100vh}.custom-grid{grid-template-columns:1fr!important}.tool-panel{order:2}.canvas-panel{order:1;min-height:620px}.property-panel{order:3}.bottom-actions{position:sticky!important}.header-copy{display:none}.tool-list{display:grid!important;grid-template-columns:repeat(4,1fr)} }
+    @media (max-width:640px){ .canvas-panel{min-height:500px}.stage-wrap{width:min(92vw,440px)!important}.tool-list{grid-template-columns:repeat(2,1fr)}.header-logo{height:32px!important}.header-product{display:none}.bottom-primary span{display:none} }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useRef,useEffect,useCallback}=React;
+const {ArrowLeft,Upload,Type,Palette,Layers3,Shirt,Undo2,Redo2,Save,RotateCcw,ChevronRight,Image:ImageIcon,Trash2,Eye,EyeOff,Move,FlipHorizontal2,ZoomIn,RotateCw,Check,Lock,Unlock,PanelRightClose,PanelRightOpen,Sparkles,Download,MousePointer2}=LucideReact;
+
+const COLORS=[
+  {code:'WHT',name:'白色',en:'White',hex:'#F2F0EA',stroke:'#FFFFFF',group:'浅',stock:'A核心',status:'供应商色号 / Pantone / Lab 待录入'},
+  {code:'BLK',name:'黑色',en:'Black',hex:'#15171A',stroke:'#30343A',group:'深',stock:'A核心',status:'供应商色号 / Pantone / Lab 待录入'},
+  {code:'HGR',name:'麻灰',en:'Heather Grey',hex:'#A6A8AA',stroke:'#C0C2C4',group:'浅/混纺',stock:'A核心',status:'真实成分与缩率待录入'},
+  {code:'CHA',name:'炭灰',en:'Charcoal',hex:'#41454A',stroke:'#5C6167',group:'深',stock:'B长尾',status:'标准比色与 Pantone / Lab 待录入'},
+  {code:'NVY',name:'藏青',en:'Navy',hex:'#182B49',stroke:'#2D4669',group:'深',stock:'A核心',status:'供应商色号 / 独立 ICC 待录入'},
+  {code:'RYL',name:'宝蓝',en:'Royal Blue',hex:'#2454B5',stroke:'#3D70D5',group:'深',stock:'B长尾',status:'供应商色号 / 独立 ICC 待录入'},
+  {code:'BUR',name:'酒红',en:'Burgundy',hex:'#6A293A',stroke:'#874356',group:'深',stock:'B长尾',status:'标准色号与 Pantone / Lab 待录入'},
+  {code:'FGN',name:'森林绿',en:'Forest Green',hex:'#294737',stroke:'#426452',group:'深',stock:'B长尾',status:'不得用军绿直接替代；待供应商确认'},
+  {code:'KHA',name:'卡其/沙色',en:'Khaki / Sand',hex:'#C7B58C',stroke:'#DCCBA4',group:'浅',stock:'B长尾',status:'供应可用性与标准色号待确认'},
+  {code:'LBL',name:'浅蓝',en:'Light Blue',hex:'#A9D7E8',stroke:'#C9ECF5',group:'浅',stock:'B长尾',status:'标准色相待锁定，避免近似色混用'}
+];
+const SHIRT_FRONT="M243 84 C253 108 274 120 300 120 C326 120 347 108 357 84 L407 106 C423 113 438 122 451 133 L510 182 C518 189 519 197 513 205 L462 267 C457 273 448 274 441 269 L409 247 L409 507 C409 519 402 526 391 526 L209 526 C198 526 191 519 191 507 L191 247 L159 269 C152 274 143 273 138 267 L87 205 C81 197 82 189 90 182 L149 133 C162 122 177 113 193 106 L243 84 Z";
+const SHIRT_BACK="M243 84 C258 99 277 106 300 106 C323 106 342 99 357 84 L407 106 C423 113 438 122 451 133 L510 182 C518 189 519 197 513 205 L462 267 C457 273 448 274 441 269 L409 247 L409 507 C409 519 402 526 391 526 L209 526 C198 526 191 519 191 507 L191 247 L159 269 C152 274 143 273 138 267 L87 205 C81 197 82 189 90 182 L149 133 C162 122 177 113 193 106 L243 84 Z";
+const TOOLS=[
+  {id:'product',label:'短袖款式',icon:Shirt}, {id:'upload',label:'上传图案',icon:Upload},
+  {id:'text',label:'添加文字',icon:Type}, {id:'layers',label:'图层管理',icon:Layers3}
+];
+const PRODUCT_VISUALS={
+ 'TEE 01':{video:'https://assets.mixkit.co/videos/809/809-2160.mp4',accent:'#d7ff45'},
+ 'TEE 02':{video:'https://assets.mixkit.co/videos/42581/42581-2160.mp4',accent:'#86e9ff'},
+ 'TEE 03':{video:'https://assets.mixkit.co/videos/42286/42286-2160.mp4',accent:'#ff68bd'},
+ 'TEE 04':{video:'https://assets.mixkit.co/videos/41480/41480-2160.mp4',accent:'#ffd38a'}
+};
+const initialDesign={color:COLORS[0],side:'front',layers:[]};
+
+function App(){
+  const params=new URLSearchParams(location.search);
+  const product=params.get('product')||'TEE 01';
+  const visual=PRODUCT_VISUALS[product]||PRODUCT_VISUALS['TEE 01'];
+  const handoffData=(()=>{try{return JSON.parse(sessionStorage.getItem('teeverse-handoff')||'null')}catch{return null}})();
+  const [arriving,setArriving]=useState(params.get('from')==='showcase'&&handoffData?.product===product);
+  const [design,setDesign]=useState(initialDesign);
+  const [past,setPast]=useState([]); const [future,setFuture]=useState([]);
+  const [tool,setTool]=useState('product'); const [selectedId,setSelectedId]=useState(null);
+  const [textDraft,setTextDraft]=useState('你的创意'); const [toast,setToast]=useState(null);
+  const [rightOpen,setRightOpen]=useState(true); const [showZone,setShowZone]=useState(true);
+  const [drag,setDrag]=useState(null); const fileRef=useRef(null); const zoneRef=useRef(null); const transformStartRef=useRef(null);
+  const activeLayers=design.layers.filter(l=>l.side===design.side);
+  const selected=design.layers.find(l=>l.id===selectedId)||null;
+  const shirtPath=design.side==='front'?SHIRT_FRONT:SHIRT_BACK;
+
+  useEffect(()=>{if(!arriving)return;const t=setTimeout(()=>{setArriving(false);sessionStorage.removeItem('teeverse-handoff')},1080);return()=>clearTimeout(t)},[arriving]);
+  const notify=useCallback(msg=>{setToast({id:Date.now(),msg});clearTimeout(notify.t);notify.t=setTimeout(()=>setToast(null),2400)},[]);
+  const commit=useCallback(updater=>{setDesign(current=>{const next=typeof updater==='function'?updater(current):updater;setPast(p=>[...p.slice(-29),current]);setFuture([]);return next})},[]);
+  const undo=()=>{if(!past.length)return;const prev=past[past.length-1];setFuture(f=>[design,...f]);setPast(p=>p.slice(0,-1));setDesign(prev);setSelectedId(null)};
+  const redo=()=>{if(!future.length)return;const next=future[0];setPast(p=>[...p,design]);setFuture(f=>f.slice(1));setDesign(next);setSelectedId(null)};
+  const updateLayer=(id,patch,record=true)=>{const fn=d=>({...d,layers:d.layers.map(l=>l.id===id?{...l,...patch}:l)});record?commit(fn):setDesign(fn)};
+  const beginTransform=()=>{transformStartRef.current=design};
+  const endTransform=()=>{if(transformStartRef.current){setPast(p=>[...p.slice(-29),transformStartRef.current]);setFuture([]);transformStartRef.current=null}};
+  const addLayer=(layer)=>{commit(d=>({...d,layers:[...d.layers,layer]}));setSelectedId(layer.id)};
+  const deleteLayer=id=>{commit(d=>({...d,layers:d.layers.filter(l=>l.id!==id)}));setSelectedId(null);notify('图层已删除')};
+
+  const uploadFile=e=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){notify('请选择 PNG、JPG 或 WebP 图片');return}const reader=new FileReader();reader.onload=()=>{const id='img-'+Date.now();addLayer({id,type:'image',name:file.name,src:reader.result,side:design.side,x:50,y:50,scale:1,rotation:0,visible:true,locked:false});setTool('layers');notify('图案已加入画布，可直接拖动')};reader.readAsDataURL(file);e.target.value=''};
+  const addText=()=>{if(!textDraft.trim())return notify('先输入要添加的文字');const id='text-'+Date.now();addLayer({id,type:'text',name:textDraft.trim(),text:textDraft.trim(),side:design.side,x:50,y:50,scale:1,rotation:0,color:design.color.group.startsWith('浅')?'#17191c':'#ffffff',font:'Inter',visible:true,locked:false});setTool('layers');notify('文字已加入画布，可直接拖动')};
+
+  const startDrag=(e,layer)=>{e.stopPropagation();setSelectedId(layer.id);if(layer.locked)return notify('该图层已锁定');setDrag({id:layer.id,startX:e.clientX,startY:e.clientY,x:layer.x,y:layer.y,before:design});e.currentTarget.setPointerCapture?.(e.pointerId)};
+  useEffect(()=>{if(!drag)return;const move=e=>{const r=zoneRef.current?.getBoundingClientRect();if(!r)return;const nx=Math.max(2,Math.min(98,drag.x+(e.clientX-drag.startX)/r.width*100));const ny=Math.max(2,Math.min(98,drag.y+(e.clientY-drag.startY)/r.height*100));updateLayer(drag.id,{x:nx,y:ny},false)};const up=()=>{setPast(p=>[...p.slice(-29),drag.before]);setFuture([]);setDrag(null)};window.addEventListener('pointermove',move);window.addEventListener('pointerup',up,{once:true});return()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up)}},[drag]);
+
+  const switchSide=side=>{if(side===design.side)return;commit(d=>({...d,side}));setSelectedId(null);notify(side==='front'?'已切换至正面':'已切换至背面')};
+  const saveDraft=()=>{try{localStorage.setItem('teeverse-draft-v1',JSON.stringify(design));notify('草稿已保存在本机')}catch(e){notify('图片较大，草稿暂时无法保存')}};
+  const loadDraft=()=>{try{const raw=localStorage.getItem('teeverse-draft-v1');if(!raw)return notify('暂时没有已保存草稿');commit(JSON.parse(raw));notify('已恢复上次草稿')}catch(e){notify('草稿读取失败')}};
+  const reset=()=>{if(!design.layers.length&&design.color.hex===COLORS[0].hex)return;commit(initialDesign);setSelectedId(null);notify('画布已重置')};
+  const downloadJSON=()=>{const blob=new Blob([JSON.stringify(design,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='teeverse-design-draft.json';a.click();URL.revokeObjectURL(a.href);notify('设计数据已导出')};
+
+  return <div data-arrival={arriving?'active':'complete'} className="desktop-shell workspace-bg relative flex h-screen min-h-screen flex-col overflow-hidden">
+    <video className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover opacity-35 saturate-75" src={visual.video} autoPlay muted loop playsInline preload="auto"/>
+    <div className="bottom-blur-mask"/>
+    <header className="top-cinema panel-in relative z-30 flex h-[76px] shrink-0 items-center justify-between px-4 backdrop-blur-xl sm:px-6 lg:px-8" style={{animationDelay:'0ms'}}>
+      <div className="flex min-w-0 items-center gap-4">
+        <a href="index.html" aria-label="返回展示首页" className="glass-soft grid h-10 w-10 shrink-0 place-items-center rounded-full transition hover:bg-white/10"><ArrowLeft size={18}/></a>
+        <img className="header-logo h-10 w-auto" src="assets/teeverse-logo-approved-v1.svg" alt="TEEVERSE"/>
+        <div className="header-copy hidden border-l border-white/10 pl-4 xl:block"><p className="text-[10px] tracking-[.24em] text-white/40">CUSTOM LAB / 01</p><p className="mt-1 text-xs text-white/70">从空白短袖开始你的创作</p></div>
+      </div>
+      <div className="header-product glass-soft rounded-full px-4 py-2 text-xs text-white/65"><span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-cyan-200"></span>{product} · {design.side==='front'?'正面':'背面'}</div>
+      <div className="flex items-center gap-2">
+        <button onClick={loadDraft} className="glass-soft hidden rounded-full px-4 py-2 text-xs text-white/70 transition hover:text-white sm:block">恢复草稿</button>
+        <button onClick={saveDraft} className="glass-soft flex items-center gap-2 rounded-full px-4 py-2 text-xs transition hover:bg-white/10"><Save size={15}/>保存</button>
+      </div>
+    </header>
+
+    <main className={`custom-grid relative z-10 grid min-h-0 flex-1 gap-3 p-3 lg:grid-cols-[210px_minmax(520px,1fr)_${rightOpen?'300px':'76px'}] lg:p-4`}>
+      <aside className="tool-panel glass panel-in min-h-0 rounded-[26px] p-3" style={{animationDelay:'160ms'}}>
+        <p className="mb-3 px-2 pt-2 text-[10px] font-semibold tracking-[.22em] text-white/35">CREATE TOOLS</p>
+        <div className="tool-list flex flex-col gap-2">{TOOLS.map(({id,label,icon:Icon})=><button key={id} onClick={()=>setTool(id)} className={`flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3.5 text-left text-sm text-white/65 transition hover:bg-white/[.055] hover:text-white ${tool===id?'active-glass text-white':''}`}><span className="glass-soft grid h-9 w-9 shrink-0 place-items-center rounded-xl"><Icon size={17}/></span><span>{label}</span>{tool===id&&<ChevronRight size={15} className="ml-auto hidden lg:block"/>}</button>)}</div>
+        <div className="mt-4 border-t border-white/[.07] pt-4">
+          <button onClick={()=>setShowZone(v=>!v)} className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-xs text-white/50 hover:bg-white/[.04] hover:text-white"><span className="glass-soft grid h-8 w-8 place-items-center rounded-lg">{showZone?<Eye size={15}/>:<EyeOff size={15}/>}</span>{showZone?'隐藏整衣设计区域':'显示整衣设计区域'}</button>
+        </div>
+      </aside>
+
+      <section className="canvas-panel glass panel-in relative flex min-h-0 flex-col rounded-[30px]" style={{animationDelay:'260ms'}}>
+        <div className="absolute left-4 top-4 z-20 flex items-center gap-1 rounded-full border border-white/10 bg-black/20 p-1 backdrop-blur-xl">
+          <button onClick={()=>switchSide('front')} className={`rounded-full px-5 py-2 text-xs transition ${design.side==='front'?'bg-white text-black':'text-white/55 hover:text-white'}`}>正面</button>
+          <button onClick={()=>switchSide('back')} className={`rounded-full px-5 py-2 text-xs transition ${design.side==='back'?'bg-white text-black':'text-white/55 hover:text-white'}`}>背面</button>
+        </div>
+        <div className="absolute right-4 top-4 z-20 flex gap-2">
+          <button onClick={undo} disabled={!past.length} aria-label="撤销" className="glass-soft grid h-10 w-10 place-items-center rounded-full disabled:opacity-25"><Undo2 size={17}/></button>
+          <button onClick={redo} disabled={!future.length} aria-label="重做" className="glass-soft grid h-10 w-10 place-items-center rounded-full disabled:opacity-25"><Redo2 size={17}/></button>
+        </div>
+        <div className="flex min-h-[440px] flex-1 items-center justify-center overflow-hidden px-3 pb-12 pt-16" onClick={()=>setSelectedId(null)}>
+          <div className="stage-wrap relative aspect-square w-[min(72vh,620px)] max-w-full">
+            <svg viewBox="0 0 600 600" className="stage-shadow absolute inset-0 h-full w-full" aria-label={`${design.side==='front'?'正面':'背面'}高级短袖预览`}>
+              <defs>
+                <linearGradient id="shirtVolume" x1="118" y1="92" x2="470" y2="520" gradientUnits="userSpaceOnUse"><stop stopColor="#000" stopOpacity=".16"/><stop offset=".18" stopColor="#fff" stopOpacity=".13"/><stop offset=".44" stopColor="#fff" stopOpacity=".025"/><stop offset=".72" stopColor="#000" stopOpacity=".055"/><stop offset="1" stopColor="#000" stopOpacity=".2"/></linearGradient>
+                <radialGradient id="shoulderLight" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(300 116) rotate(90) scale(224 245)"><stop stopColor="#fff" stopOpacity=".19"/><stop offset=".42" stopColor="#fff" stopOpacity=".035"/><stop offset="1" stopColor="#000" stopOpacity=".08"/></radialGradient>
+                <linearGradient id="foldLight" x1="170" y1="110" x2="430" y2="500" gradientUnits="userSpaceOnUse"><stop stopColor="#fff" stopOpacity=".38"/><stop offset=".48" stopColor="#fff" stopOpacity=".04"/><stop offset="1" stopColor="#000" stopOpacity=".24"/></linearGradient>
+                <linearGradient id="edgeLight" x1="90" y1="95" x2="510" y2="520" gradientUnits="userSpaceOnUse"><stop stopColor="#fff" stopOpacity=".68"/><stop offset=".25" stopColor="#fff" stopOpacity=".16"/><stop offset=".72" stopColor="#000" stopOpacity=".24"/><stop offset="1" stopColor="#fff" stopOpacity=".18"/></linearGradient>
+                <pattern id="microWeave" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><path d="M0 1H5M0 4H5" stroke="#fff" strokeOpacity=".055" strokeWidth=".55"/></pattern>
+                <filter id="garmentShadow" x="-35%" y="-30%" width="170%" height="190%"><feDropShadow dx="0" dy="22" stdDeviation="20" floodColor="#000" floodOpacity=".52"/></filter>
+                <filter id="softFold" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.7"/></filter>
+              </defs>
+              <ellipse cx="300" cy="520" rx="144" ry="30" fill="#7DDCF0" opacity=".055" filter="url(#softFold)"/>
+              <g filter="url(#garmentShadow)">
+                <path d={shirtPath} fill={design.color.hex}/>
+                <path d={shirtPath} fill="url(#shirtVolume)" style={{mixBlendMode:'soft-light'}}/>
+                <path d={shirtPath} fill="url(#shoulderLight)" style={{mixBlendMode:'screen'}} opacity=".78"/>
+                <path d={shirtPath} fill="url(#microWeave)" opacity=".55"/>
+              </g>
+              <path d={shirtPath} fill="none" stroke="url(#edgeLight)" strokeWidth="3" strokeLinejoin="round"/>
+              {/* 罗纹领口 */}
+              <path d={design.side==='front'?"M243 84 C253 108 274 120 300 120 C326 120 347 108 357 84":"M243 84 C258 99 277 106 300 106 C323 106 342 99 357 84"} fill="none" stroke={design.color.stroke} strokeOpacity=".72" strokeWidth="13" strokeLinecap="round"/>
+              <path d={design.side==='front'?"M243 84 C253 108 274 120 300 120 C326 120 347 108 357 84":"M243 84 C258 99 277 106 300 106 C323 106 342 99 357 84"} fill="none" stroke="#fff" strokeOpacity=".38" strokeWidth="3" strokeLinecap="round"/>
+              {/* 肩缝与袖口车线 */}
+              <path d="M244 91 C226 97 208 103 193 111 M356 91 C374 97 392 103 407 111" fill="none" stroke="#fff" strokeOpacity=".16" strokeWidth="2"/>
+              <path d="M98 190 L151 254 M502 190 L449 254" fill="none" stroke="#000" strokeOpacity=".2" strokeWidth="5"/>
+              <path d="M100 188 L153 251 M500 188 L447 251" fill="none" stroke="#fff" strokeOpacity=".19" strokeWidth="1.8"/>
+              {/* 立体褶皱 */}
+              <g fill="none" strokeLinecap="round" filter="url(#softFold)">
+                <path d="M205 119 C220 161 219 205 207 253" stroke="#fff" strokeOpacity=".13" strokeWidth="7"/>
+                <path d="M395 119 C380 161 381 205 393 253" stroke="#000" strokeOpacity=".13" strokeWidth="8"/>
+                <path d="M184 153 C206 177 216 211 211 251" stroke="#000" strokeOpacity=".11" strokeWidth="6"/>
+                <path d="M416 153 C394 177 384 211 389 251" stroke="#fff" strokeOpacity=".1" strokeWidth="5"/>
+                <path d="M249 139 C238 234 249 383 238 496" stroke="#fff" strokeOpacity=".08" strokeWidth="11"/>
+                <path d="M351 139 C362 234 351 383 362 496" stroke="#000" strokeOpacity=".08" strokeWidth="12"/>
+                <path d="M290 139 C278 245 283 389 274 510" stroke="#000" strokeOpacity=".045" strokeWidth="7"/>
+              </g>
+              {/* 侧缝、下摆和背部育克 */}
+              <path d="M193 247 L193 506 M407 247 L407 506" fill="none" stroke="#000" strokeOpacity=".12" strokeWidth="2"/>
+              <path d="M204 502 C260 506 340 506 396 502" fill="none" stroke="#000" strokeOpacity=".24" strokeWidth="5"/>
+              <path d="M205 499 C260 503 340 503 395 499" fill="none" stroke="#fff" strokeOpacity=".17" strokeWidth="1.6"/>
+              {design.side==='back'&&<path d="M207 132 C260 145 340 145 393 132" fill="none" stroke="#000" strokeOpacity=".16" strokeWidth="2"/>}
+            </svg>
+            <div ref={zoneRef} className={`print-zone absolute left-[14.33%] top-[14.17%] h-[72.5%] w-[71.34%] overflow-hidden transition ${showZone?'design-guide':'bg-transparent'}`} onClick={e=>e.stopPropagation()}>
+              {activeLayers.map(layer=><div key={layer.id} onPointerDown={e=>startDrag(e,layer)} onClick={e=>{e.stopPropagation();setSelectedId(layer.id)}} className={`layer-item absolute flex items-center justify-center ${selectedId===layer.id?'outline outline-1 outline-offset-4 outline-cyan-100/70':''} ${layer.visible?'':'hidden'}`} style={{left:`${layer.x}%`,top:`${layer.y}%`,transform:`translate(-50%,-50%) rotate(${layer.rotation}deg) scale(${layer.scale})`,maxWidth:'90%',maxHeight:'90%'}}>
+                {layer.type==='image'?<img src={layer.src} alt={layer.name} draggable="false" className="max-h-36 max-w-36 select-none object-contain drop-shadow-lg"/>:<span contentEditable={false} style={{color:layer.color,fontFamily:layer.font}} className="whitespace-nowrap text-center text-xl font-semibold leading-none drop-shadow-lg">{layer.text}</span>}
+                {selectedId===layer.id&&<><span className="absolute -left-2 -top-2 h-2.5 w-2.5 rounded-full border border-black/30 bg-white shadow"></span><span className="absolute -bottom-2 -right-2 h-2.5 w-2.5 rounded-full border border-black/30 bg-cyan-100 shadow"></span></>}
+              </div>)}
+              {!activeLayers.length&&showZone&&<div className={`pointer-events-none absolute inset-0 grid place-items-center text-center ${design.color.group.startsWith('浅')?'text-black/35':'text-white/35'}`}><div><MousePointer2 size={22} className="mx-auto mb-2"/><p className="text-[10px] tracking-[.12em]">整衣可设计区域</p></div></div>}
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/[.08] bg-black/20 px-4 py-2 text-[10px] tracking-[.12em] text-white/35 backdrop-blur-md">拖动画布元素进行定位 · 当前 {activeLayers.length} 个图层</div>
+      </section>
+
+      <aside className={`property-panel glass panel-in min-h-0 overflow-y-auto rounded-[26px] transition-all ${rightOpen?'p-4':'p-3'}`} style={{animationDelay:'360ms'}}>
+        <div className="mb-4 flex items-center justify-between"><div className={rightOpen?'':'hidden'}><p className="text-[10px] font-semibold tracking-[.22em] text-white/35">PROPERTIES</p><h2 className="mt-1 text-sm font-medium">{tool==='product'?'短袖设置':tool==='upload'?'上传图案':tool==='text'?'添加文字':'图层管理'}</h2></div><button onClick={()=>setRightOpen(v=>!v)} className="glass-soft grid h-9 w-9 place-items-center rounded-full">{rightOpen?<PanelRightClose size={16}/>:<PanelRightOpen size={16}/>}</button></div>
+        {!rightOpen?<div className="flex flex-col items-center gap-3 pt-3">{TOOLS.map(({id,icon:Icon})=><button key={id} onClick={()=>{setTool(id);setRightOpen(true)}} className={`glass-soft grid h-10 w-10 place-items-center rounded-xl ${tool===id?'active-glass':''}`}><Icon size={16}/></button>)}</div>:
+        <div className="space-y-4">
+          {tool==='product'&&<>
+            <div className="glass-soft rounded-2xl p-4">
+              <div className="mb-4 flex items-center justify-between"><div><p className="text-sm font-medium">选择颜色</p><p className="mt-1 text-[10px] text-white/35">挑选你喜欢的短袖底色</p></div><span className="text-[10px] text-white/35">10 种颜色</span></div>
+              <div className="grid grid-cols-5 gap-2">{COLORS.map(c=><button key={c.code} aria-label={`选择${c.name}`} title={c.name} onClick={()=>commit(d=>({...d,color:c}))} className={`group rounded-xl border px-1 py-2.5 text-center transition ${design.color.code===c.code?'border-white/55 bg-white/10':'border-white/[.06] hover:bg-white/[.05]'}`}><span className={`mx-auto block h-8 w-8 rounded-full border shadow-lg transition-transform group-hover:scale-110 ${design.color.code===c.code?'border-white/70 ring-2 ring-white/15':'border-white/15'}`} style={{background:c.hex}}></span><span className={`mt-2 block truncate text-[9px] ${design.color.code===c.code?'text-white':'text-white/50'}`}>{c.name}</span></button>)}</div>
+            </div>
+            <div className="glass-soft rounded-2xl p-4">
+              <div className="flex items-center gap-3"><span className="block h-12 w-12 shrink-0 rounded-2xl border border-white/20 shadow-lg" style={{background:design.color.hex}}></span><div className="min-w-0"><p className="text-[10px] text-white/35">已选择</p><p className="mt-1 text-sm font-medium">{design.color.name}</p><p className="mt-0.5 text-[10px] text-white/35">{design.color.en}</p></div><Check size={16} className="ml-auto text-cyan-100/70"/></div>
+              <p className="mt-4 border-t border-white/[.06] pt-3 text-[9px] leading-relaxed text-white/30">不同屏幕和面料可能产生轻微色差，最终颜色以实物为准。</p>
+            </div>
+          </>}
+          {tool==='upload'&&<><button onClick={()=>fileRef.current?.click()} className="glass-soft group flex w-full flex-col items-center rounded-2xl border border-dashed border-white/15 px-4 py-8 text-center transition hover:border-cyan-100/30 hover:bg-white/[.055]"><span className="active-glass mb-3 grid h-12 w-12 place-items-center rounded-2xl"><Upload size={20}/></span><span className="text-sm">选择本地图片</span><span className="mt-2 text-[10px] leading-relaxed text-white/35">支持 PNG / JPG / WebP<br/>建议使用透明背景 PNG</span></button><input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={uploadFile}/><div className="glass-soft rounded-2xl p-4 text-[11px] leading-relaxed text-white/40"><p className="mb-2 flex items-center gap-2 text-white/65"><Sparkles size={14}/>基础版本已支持</p>上传后可拖动到衣身、袖口、肩部等任意位置，并在属性区调整缩放、旋转、显示和锁定。</div></>}
+          {tool==='text'&&<><div className="glass-soft rounded-2xl p-4"><label className="mb-2 block text-xs text-white/50">文字内容</label><input value={textDraft} onChange={e=>setTextDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')addText()}} maxLength="30" className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm outline-none transition placeholder:text-white/25 focus:border-cyan-100/35" placeholder="输入你的文字"/><button onClick={addText} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium text-black hover:bg-cyan-50"><Type size={16}/>添加到短袖</button></div><div className="glass-soft rounded-2xl p-4"><p className="text-[11px] leading-relaxed text-white/40">添加后切换到“图层管理”，可调整字体颜色、缩放、旋转和位置。</p></div></>}
+          {tool==='layers'&&<><div className="max-h-[260px] space-y-2 overflow-auto pr-1">{activeLayers.length?activeLayers.slice().reverse().map(l=><button key={l.id} onClick={()=>setSelectedId(l.id)} className={`flex w-full items-center gap-3 rounded-xl border p-2.5 text-left transition ${selectedId===l.id?'active-glass':'border-white/[.06] bg-white/[.025] hover:bg-white/[.05]'}`}><span className="glass-soft grid h-9 w-9 shrink-0 place-items-center rounded-lg">{l.type==='image'?<ImageIcon size={16}/>:<Type size={16}/>}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs">{l.name}</span><span className="mt-1 block text-[9px] text-white/30">{l.type==='image'?'图片图层':'文字图层'}</span></span>{l.locked?<Lock size={13} className="text-white/35"/>:null}</button>):<div className="glass-soft rounded-2xl px-4 py-8 text-center"><Layers3 size={22} className="mx-auto mb-3 text-white/25"/><p className="text-xs text-white/40">当前画面还没有图层</p></div>}</div>
+            {selected&&selected.side===design.side&&<div className="glass-soft space-y-4 rounded-2xl p-4"><div className="flex items-center justify-between"><p className="max-w-[160px] truncate text-xs font-medium">{selected.name}</p><div className="flex gap-1"><button onClick={()=>updateLayer(selected.id,{visible:!selected.visible})} className="grid h-8 w-8 place-items-center rounded-lg bg-white/[.05]">{selected.visible?<Eye size={14}/>:<EyeOff size={14}/>}</button><button onClick={()=>updateLayer(selected.id,{locked:!selected.locked})} className="grid h-8 w-8 place-items-center rounded-lg bg-white/[.05]">{selected.locked?<Lock size={14}/>:<Unlock size={14}/>}</button><button onClick={()=>deleteLayer(selected.id)} className="grid h-8 w-8 place-items-center rounded-lg bg-red-400/10 text-red-200"><Trash2 size={14}/></button></div></div>
+              <div><div className="mb-2 flex justify-between text-[10px] text-white/40"><span className="flex items-center gap-1"><ZoomIn size={12}/>缩放</span><span>{Math.round(selected.scale*100)}%</span></div><input className="range" type="range" min="0.35" max="2.2" step="0.05" value={selected.scale} onPointerDown={beginTransform} onChange={e=>updateLayer(selected.id,{scale:+e.target.value},false)} onPointerUp={endTransform}/></div>
+              <div><div className="mb-2 flex justify-between text-[10px] text-white/40"><span className="flex items-center gap-1"><RotateCw size={12}/>旋转</span><span>{Math.round(selected.rotation)}°</span></div><input className="range" type="range" min="-180" max="180" step="1" value={selected.rotation} onPointerDown={beginTransform} onChange={e=>updateLayer(selected.id,{rotation:+e.target.value},false)} onPointerUp={endTransform}/></div>
+              {selected.type==='text'&&<><div><label className="mb-2 block text-[10px] text-white/40">文字颜色</label><div className="flex gap-2">{['#ffffff','#17191c','#b9e7ff','#dccbff','#ffb9ca'].map(c=><button key={c} onClick={()=>updateLayer(selected.id,{color:c})} className={`h-7 w-7 rounded-full border ${selected.color===c?'border-white':'border-white/15'}`} style={{background:c}}></button>)}</div></div><div><label className="mb-2 block text-[10px] text-white/40">字体</label><select value={selected.font} onChange={e=>updateLayer(selected.id,{font:e.target.value})} className="w-full rounded-xl border border-white/10 bg-[#15171c] px-3 py-2.5 text-xs outline-none"><option value="Inter">Inter</option><option value="Arial Black">Arial Black</option><option value="Georgia">Georgia</option><option value="monospace">Monospace</option></select></div></>}
+            </div>}
+          </>}
+        </div>}
+      </aside>
+    </main>
+
+    <footer className="bottom-actions panel-in relative z-30 flex h-[76px] shrink-0 items-center justify-between px-4 backdrop-blur-2xl sm:px-6 lg:px-8" style={{animationDelay:'460ms'}}>
+      <div className="flex items-center gap-2"><button onClick={reset} className="glass-soft flex items-center gap-2 rounded-full px-4 py-2.5 text-xs text-white/55 hover:text-white"><RotateCcw size={15}/>重置</button><button onClick={downloadJSON} className="glass-soft hidden items-center gap-2 rounded-full px-4 py-2.5 text-xs text-white/55 hover:text-white sm:flex"><Download size={15}/>导出设计数据</button></div>
+      <div className="hidden text-center md:block"><p className="text-[10px] tracking-[.18em] text-white/30">ESTIMATED QUOTE</p><p className="mt-1 text-xs text-white/65">价格与交期：待真实供应链报价</p></div>
+      <button onClick={()=>notify('基础设计已记录，询价与下单将在下一阶段接入')} className="bottom-primary group flex items-center gap-3 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-cyan-50 sm:px-7"><Check size={17}/><span>完成设计并询价</span><ChevronRight size={17} className="transition-transform group-hover:translate-x-1"/></button>
+    </footer>
+
+    {arriving&&<div className="arrival-veil pointer-events-none fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-black/10">
+      <div className="arrival-core absolute h-28 w-28 rounded-full" style={{background:'radial-gradient(circle,rgba(250,252,255,.96) 0%,rgba(188,197,208,.62) 18%,rgba(111,121,134,.32) 40%,rgba(30,34,40,.18) 58%,rgba(0,0,0,0) 74%)',boxShadow:'0 0 90px rgba(194,205,218,.22), 0 0 180px rgba(85,94,106,.16)'}}/>
+      <div className="arrival-logo relative z-10 flex flex-col items-center gap-4"><img src="assets/teeverse-logo-mark-approved-v1.svg" className="h-20 w-20 drop-shadow-[0_0_28px_rgba(255,255,255,.35)]" alt=""/><span className="text-[10px] tracking-[.34em] text-white/75">CUSTOM LAB · {product}</span></div>
+    </div>}
+    {toast&&<div key={toast.id} className="toast-in fixed bottom-[92px] right-4 z-50 sm:right-6"><div className="glass flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full px-5 py-3 text-xs"><Sparkles size={15} className="text-cyan-100"/><span className="truncate">{toast.msg}</span></div></div>}
+  </div>
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
