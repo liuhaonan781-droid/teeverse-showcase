@@ -611,6 +611,10 @@ video {
   right: 0px;
 }
 
+.right-4 {
+  right: 1rem;
+}
+
 .top-\[56px\] {
   top: 56px;
 }
@@ -747,8 +751,8 @@ video {
   max-width: 42rem;
 }
 
-.max-w-\[70vw\] {
-  max-width: 70vw;
+.max-w-\[55vw\] {
+  max-width: 55vw;
 }
 
 .flex-1 {
@@ -1248,6 +1252,10 @@ video {
 }
 
 @media (min-width: 640px) {
+  .sm\:right-6 {
+    right: 1.5rem;
+  }
+
   .sm\:flex {
     display: flex;
   }
@@ -1262,6 +1270,10 @@ video {
 
   .sm\:w-5 {
     width: 1.25rem;
+  }
+
+  .sm\:max-w-xs {
+    max-width: 20rem;
   }
 
   .sm\:gap-4 {
@@ -1311,6 +1323,10 @@ video {
 @media (min-width: 768px) {
   .md\:bottom-5 {
     bottom: 1.25rem;
+  }
+
+  .md\:bottom-8 {
+    bottom: 2rem;
   }
 
   .md\:mb-12 {
@@ -23148,12 +23164,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           </button>
         </div>
 
-        {/* ===== Toast ===== */}
+        {/* ===== Toast 提示（右下角，避开底部居中的切换按钮） ===== */}
         {toast && (
-          <div key={toast.id} className="animate-toast-in fixed bottom-6 left-1/2 z-[60] -translate-x-1/2">
+          <div key={toast.id} className="animate-toast-in fixed bottom-6 right-4 z-[60] sm:right-6 md:bottom-8">
             <div className="liquid-glass flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm text-white">
               <Shirt size={16} className="text-gray-200" />
-              <span className="max-w-[70vw] truncate whitespace-nowrap">{toast.msg}</span>
+              <span className="max-w-[55vw] truncate whitespace-nowrap sm:max-w-xs">{toast.msg}</span>
             </div>
           </div>
         )}
