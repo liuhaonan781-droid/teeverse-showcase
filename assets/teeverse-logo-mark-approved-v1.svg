@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="24 14 292 292" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="glassFace" x1="43" y1="36" x2="282" y2="287" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF" stop-opacity=".22"/><stop offset=".22" stop-color="#DCEBFF" stop-opacity=".08"/><stop offset=".55" stop-color="#7E8DAD" stop-opacity=".04"/><stop offset="1" stop-color="#FFF" stop-opacity=".13"/></linearGradient>
+  <linearGradient id="glassRim" x1="57" y1="48" x2="265" y2="277" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF" stop-opacity=".9"/><stop offset=".17" stop-color="#FFF" stop-opacity=".2"/><stop offset=".46" stop-color="#86B8FF" stop-opacity=".18"/><stop offset=".72" stop-color="#D8B9FF" stop-opacity=".32"/><stop offset="1" stop-color="#FFF" stop-opacity=".72"/></linearGradient>
+  <linearGradient id="prism" x1="90" y1="73" x2="229" y2="240" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF"/><stop offset=".2" stop-color="#D7E7FF"/><stop offset=".44" stop-color="#FFF" stop-opacity=".78"/><stop offset=".67" stop-color="#D9C8FF" stop-opacity=".88"/><stop offset=".84" stop-color="#A7F4F0" stop-opacity=".72"/><stop offset="1" stop-color="#FFF"/></linearGradient>
+  <radialGradient id="bloom" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(126 91) rotate(52) scale(196 181)"><stop stop-color="#B8E8FF" stop-opacity=".22"/><stop offset=".48" stop-color="#A98CFF" stop-opacity=".07"/><stop offset="1" stop-color="#FFF" stop-opacity="0"/></radialGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#020308" flood-opacity=".48"/></filter>
+  <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="9" result="blur"/><feComposite in="blur" in2="SourceGraphic" operator="over"/></filter>
+  <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
+  <clipPath id="sq"><rect x="44" y="34" width="252" height="252" rx="78"/></clipPath>
+</defs>
+<g filter="url(#shadow)">
+  <rect x="44" y="34" width="252" height="252" rx="78" fill="url(#glassFace)"/>
+  <rect x="45" y="35" width="250" height="250" rx="77" stroke="url(#glassRim)" stroke-width="2"/>
+  <rect x="52" y="42" width="236" height="236" rx="70" stroke="#FFF" stroke-opacity=".08"/>
+  <g clip-path="url(#sq)"><ellipse cx="118" cy="70" rx="118" ry="70" fill="url(#bloom)"/><path d="M31 238C93 185 167 169 314 182" stroke="#96EAF4" stroke-opacity=".09" stroke-width="52" filter="url(#blur)"/><path d="M83 16C138 99 207 105 327 70" stroke="#D7C4FF" stroke-opacity=".08" stroke-width="34" filter="url(#blur)"/></g>
+  <path d="M76 89C91 55 121 48 170 48H214C250 48 270 67 279 94" stroke="#FFF" stroke-opacity=".2" stroke-width="3" stroke-linecap="round"/>
+</g>
+<g filter="url(#glow)">
+  <path d="M98 111L133 90C144 107 154 114 170 114C186 114 196 107 207 90L242 111L229 139L204 126V226H136V126L111 139L98 111Z" fill="#FFF" fill-opacity=".035" stroke="url(#prism)" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M133 90C139 118 201 118 207 90" stroke="url(#prism)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M126 126H214" stroke="url(#prism)" stroke-width="12" stroke-linecap="round"/><path d="M170 128V216" stroke="url(#prism)" stroke-width="12" stroke-linecap="round"/>
+</g>
+<g><circle cx="88" cy="101" r="3.5" fill="#FFF" fill-opacity=".82"/><circle cx="252" cy="101" r="3.5" fill="#C8D8FF" fill-opacity=".82"/><circle cx="88" cy="236" r="3.5" fill="#D8C9FF" fill-opacity=".82"/><circle cx="252" cy="236" r="3.5" fill="#BDF4EE" fill-opacity=".82"/><path d="M88 91V81H98M242 81H252V91M88 246V256H98M242 256H252V246" stroke="#FFF" stroke-opacity=".28" stroke-width="1.5" stroke-linecap="round"/></g>
+</svg>
