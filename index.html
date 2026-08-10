@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TEEVERSE · 把热爱，穿在身上</title>
+
+<!-- Google Fonts: Inter 300-700 -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- Tailwind CSS (Play CDN) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- React / ReactDOM UMD -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<!-- lucide-react UMD needs global `react` (lowercase) -->
+<script>window.react = window.React;</script>
+<script src="https://unpkg.com/lucide-react@0.441.0/dist/umd/lucide-react.js"></script>
+<!-- Babel standalone: transpile inline JSX -->
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<style>
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #root { height: 100%; }
+
+  /* ---------- 液态玻璃 ---------- */
+  .liquid-glass {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.01);
+    mix-blend-mode: luminosity;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.45) 0%,
+      rgba(255,255,255,0.15) 20%,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.15) 80%,
+      rgba(255,255,255,0.45) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button:active, a:active { transform: scale(0.95); }
+
+  /* ---------- 渐入上浮模糊动画 ---------- */
+  @keyframes blurFadeUp {
+    from { opacity: 0; filter: blur(20px); transform: translateY(40px); }
+    to   { opacity: 1; filter: blur(0); transform: translateY(0); }
+  }
+  .animate-blur-fade-up {
+    opacity: 0;
+    animation: blurFadeUp 1s ease-out forwards;
+  }
+
+  /* ---------- 内容切换动画 ---------- */
+  @keyframes contentIn {
+    from { opacity: 0; transform: translateY(14px); filter: blur(8px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  .animate-content-in { animation: contentIn 0.55s ease-out forwards; }
+
+  /* ---------- 移动端菜单横向划入 ---------- */
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .animate-slide-in-left {
+    opacity: 0;
+    animation: slideInLeft 0.5s ease-out forwards;
+  }
+
+  /* ---------- 底部模糊遮罩 ---------- */
+  .bottom-blur-mask {
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    -webkit-mask-image: linear-gradient(to top, black 0%, transparent 45%);
+    mask-image: linear-gradient(to top, black 0%, transparent 45%);
+  }
+
+  /* ---------- 视频转场（方向感知滑动+淡入） ---------- */
+  @keyframes videoInRight {
+    from { opacity: 0; transform: translateX(4%) scale(1.02); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes videoInLeft {
+    from { opacity: 0; transform: translateX(-4%) scale(1.02); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes videoOutLeft {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to   { opacity: 0; transform: translateX(-4%) scale(1.02); }
+  }
+  @keyframes videoOutRight {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to   { opacity: 0; transform: translateX(4%) scale(1.02); }
+  }
+  .video-in-right { animation: videoInRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .video-in-left  { animation: videoInLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .video-out-left { animation: videoOutLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .video-out-right{ animation: videoOutRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+  /* ---------- Toast / 搜索面板 / 指示点 ---------- */
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-toast-in { animation: toastIn 0.3s ease-out forwards; }
+  @keyframes searchIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-search-in { animation: searchIn 0.3s ease-out forwards; }
+  .dot { transition: all 0.3s ease; }
+
+  @keyframes hintIn { from { opacity: 0; } to { opacity: 1; } }
+  .loading-hint {
+    animation: hintIn 0.3s ease-out forwards;
+    font-family: 'Inter', sans-serif;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-blur-fade-up, .animate-slide-in-left, .animate-content-in,
+    .video-in-right, .video-in-left, .video-out-left, .video-out-right { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+
+<body class="bg-black text-white">
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState, useCallback, useEffect, useRef } = React;
+  const {
+    Search, User, Menu, X, Star, Clock, Calendar, Play, ChevronLeft, ChevronRight, Sparkles, Shirt, Loader2
+  } = LucideReact;
+
+  const NAV_LINKS = ['款式系列', '工艺品质', '定制流程', '客户作品', '关于我们'];
+
+  // 四款产品：每款绑定独立 4K(2160p) 背景视频，内容与款式说明匹配
+  // TEE   -> 时装模特镜前（多面镜展示，简洁时尚）
+  // POL   -> 复古绅士模特（精致商务感）
+  // SWE   -> 男士穿衣特写（舒适日常）
+  // HDY   -> 雪佛兰夜色时尚女性（街头潮流）
+  const PRODUCTS = [
+    {
+      name: 'TEE 圆领短袖',
+      tagline: '把热爱，穿在身上。',
+      desc: '100% 精梳棉 180gsm · DTG 直喷 · 黑白双底独立校色，从河北智造到澳洲街头，每一件都为你而织。',
+      price: 'A$49.90 起',
+      meta1: 'A$49.90 起 · 1件起订',
+      meta2: '7—10 工作日达澳',
+      meta3: '2026 秋冬 · 10色可选',
+      video: 'https://assets.mixkit.co/videos/809/809-2160.mp4',
+      videoNote: '模特镜前 · 4K',
+    },
+    {
+      name: 'POL Polo 衫',
+      tagline: '质感，藏于针脚之间。',
+      desc: '珠地棉 Polo · 小 Logo 刺绣 · 团体协作订单专属，商务与街头之间，一件切换。',
+      price: 'A$69.90 起',
+      meta1: 'A$69.90 起 · 1件起订',
+      meta2: '7—10 工作日达澳',
+      meta3: '刺绣 · DTF · 10色可选',
+      video: 'https://assets.mixkit.co/videos/41480/41480-2160.mp4',
+      videoNote: '绅士模特 · 4K',
+    },
+    {
+      name: 'SWE 无帽卫衣',
+      tagline: '舒适，是最高级的表达。',
+      desc: '棉毛圈重磅面料 · 落肩宽松版型 · 秋冬氛围担当，把温度与态度一起穿上。',
+      price: 'A$89.90 起',
+      meta1: 'A$89.90 起 · 1件起订',
+      meta2: '7—10 工作日达澳',
+      meta3: '2026 秋冬 · 10色可选',
+      video: 'https://assets.mixkit.co/videos/151/151-2160.mp4',
+      videoNote: '穿衣特写 · 4K',
+    },
+    {
+      name: 'HDY 带帽卫衣',
+      tagline: '潮起，从不看天气。',
+      desc: '连帽重磅卫衣 · 双面印花空间 · 街头造型核心单品，防风保暖也要有型。',
+      price: 'A$99.90 起',
+      meta1: 'A$99.90 起 · 1件起订',
+      meta2: '7—10 工作日达澳',
+      meta3: '加绒款 · 10色可选',
+      video: 'https://assets.mixkit.co/videos/44554/44554-2160.mp4',
+      videoNote: '夜色街头 · 4K',
+    },
+  ];
+
+  // 是否为当前款式的相邻款式（环形相邻）
+  const isAdjacent = (i, cur) => {
+    const n = PRODUCTS.length;
+    const diff = Math.abs(i - cur);
+    return diff === 1 || diff === n - 1;
+  };
+
+  function App() {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [productIdx, setProductIdx] = useState(0);
+    const [slideKey, setSlideKey] = useState(0);
+    const [toast, setToast] = useState(null);
+    const [navActive, setNavActive] = useState('款式系列');
+    // 视频转场状态：anim = {from, to, dir} | null；loading = 目标视频缓冲中
+    const [anim, setAnim] = useState(null);
+    const [videoLoading, setVideoLoading] = useState(false);
+    const videoRefs = useRef({});
+
+    const product = PRODUCTS[productIdx];
+
+    const showToast = useCallback((msg, icon) => {
+      setToast({ msg, icon: icon || null, id: Date.now() });
+      window.clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => setToast(null), 2600);
+    }, []);
+
+    const toggleMenu = () => setMenuOpen(o => !o);
+
+    // 款式切换：带方向感知的视频转场
+    const goProduct = useCallback((dir) => {
+      const from = productIdx;
+      const next = (from + dir + PRODUCTS.length) % PRODUCTS.length;
+      if (next === from) return;
+      setAnim({ from, to: next, dir });
+      setProductIdx(next);
+      setVideoLoading(true);
+      setSlideKey(k => k + 1);
+    }, [productIdx]);
+
+    // 目标视频加载完成后开始淡入
+    const handleVideoCanPlay = useCallback((idx) => {
+      if (anim && idx === anim.to) {
+        setVideoLoading(false);
+      }
+    }, [anim]);
+
+    // 转场结束后清理
+    useEffect(() => {
+      if (!anim) return;
+      const t = setTimeout(() => {
+        setAnim(null);
+        setVideoLoading(false);   // 兜底：无论 canplay 是否触发，动画结束即清除加载指示
+      }, 950);
+      return () => clearTimeout(t);
+    }, [anim]);
+
+    // 当前视频确保播放
+    useEffect(() => {
+      const v = videoRefs.current[productIdx];
+      if (v) { const p = v.play(); if (p) p.catch(() => {}); }
+    }, [productIdx, anim]);
+
+    // 暂停非当前视频（节省带宽）
+    useEffect(() => {
+      Object.keys(videoRefs.current).forEach(k => {
+        const v = videoRefs.current[k];
+        if (v && Number(k) !== productIdx) v.pause();
+      });
+    }, [productIdx]);
+
+    const handleSearchSubmit = (e) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        showToast(`搜索「${searchQuery.trim()}」：款式库建设中，敬请期待`);
+        setSearchQuery('');
+        setSearchOpen(false);
+      } else {
+        showToast('请输入要搜索的内容');
+      }
+    };
+
+    const videoClass = (i) => {
+      if (anim && i === anim.to) return anim.dir === 1 ? 'video-in-right z-[2]' : 'video-in-left z-[2]';
+      if (anim && i === anim.from) return anim.dir === 1 ? 'video-out-left' : 'video-out-right';
+      if (i === productIdx) return 'z-[1]';
+      return 'opacity-0';
+    };
+
+    return (
+      <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
+        {/* ===== 背景视频栈（z-0，每款独立 4K 视频） ===== */}
+        <div className="fixed inset-0 z-0">
+          {PRODUCTS.map((p, i) => (
+            <video
+              key={p.video}
+              ref={el => { videoRefs.current[i] = el; }}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${videoClass(i)}`}
+              src={p.video}
+              muted loop playsInline
+              preload={
+                i === productIdx
+                  ? 'auto'
+                  : isAdjacent(i, productIdx)
+                    ? 'auto'          // 相邻款式预加载，切换更顺滑
+                    : 'none'
+              }
+              onCanPlay={() => handleVideoCanPlay(i)}
+              onWaiting={() => { if (i === productIdx) setVideoLoading(true); }}
+            />
+          ))}
+        </div>
+
+        {/* ===== 底部模糊遮罩层（z-1） ===== */}
+        <div className="bottom-blur-mask pointer-events-none fixed inset-0 z-[1]" />
+
+        {/* ===== 导航栏（z-50） ===== */}
+        <nav className="relative z-50 flex items-center justify-between px-1 py-1 sm:px-1.5 md:px-3 md:py-1.5">
+          <button
+            type="button"
+            onClick={() => { setNavActive(''); showToast('TEEVERSE · 澳大利亚定制服饰品牌'); }}
+            className="animate-blur-fade-up flex h-8 cursor-pointer items-center md:h-10"
+            style={{ animationDelay: '0ms' }}
+          >
+            <span className="text-lg font-semibold tracking-[0.22em] md:text-xl">TEEVERSE</span>
+          </button>
+
+          <div className="hidden items-center gap-8 lg:flex">
+            {NAV_LINKS.map((link, i) => (
+              <a
+                key={link}
+                href="#"
+                onClick={e => { e.preventDefault(); setNavActive(link); showToast(`「${link}」：内容建设中，敬请期待`); }}
+                className={`animate-blur-fade-up text-sm transition-colors duration-300 hover:text-gray-400 ${
+                  navActive === link ? 'text-white underline decoration-gray-500 underline-offset-8' : 'text-white'
+                }`}
+                style={{ animationDelay: `${100 + i * 50}ms` }}
+              >
+                {link}
+              </a>
+            ))}
+          </div>
+
+          <div className="hidden items-center gap-2 sm:flex md:gap-2.5">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(o => !o)}
+              className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center gap-1.5 rounded-full px-1.5 py-0.5 text-sm text-white md:px-2"
+              style={{ animationDelay: '350ms' }}
+            >
+              <Search size={18} />
+              <span>搜索</span>
+            </button>
+
+            <button
+              type="button"
+              aria-label="个人中心"
+              onClick={() => showToast('个人中心：登录与订单功能建设中')}
+              className="animate-blur-fade-up liquid-glass flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white"
+              style={{ animationDelay: '400ms' }}
+            >
+              <User size={18} />
+            </button>
+
+            <button
+              type="button"
+              aria-label="菜单"
+              aria-expanded={menuOpen}
+              onClick={toggleMenu}
+              className="animate-blur-fade-up liquid-glass relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white lg:hidden"
+              style={{ animationDelay: '350ms' }}
+            >
+              <span className="absolute inset-0 flex items-center justify-center">
+                <Menu
+                  size={20}
+                  className={`absolute transition-all duration-500 ease-out ${
+                    menuOpen ? 'rotate-180 scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'
+                  }`}
+                />
+                <X
+                  size={20}
+                  className={`absolute transition-all duration-500 ease-out ${
+                    menuOpen ? 'rotate-0 scale-100 opacity-100' : 'rotate-180 scale-50 opacity-0'
+                  }`}
+                />
+              </span>
+            </button>
+          </div>
+        </nav>
+
+        {/* ===== 搜索面板 ===== */}
+        {searchOpen && (
+          <div className="animate-search-in absolute left-0 right-0 top-[56px] z-40 px-4 sm:px-6 md:px-12">
+            <form onSubmit={handleSearchSubmit} className="liquid-glass flex items-center gap-3 rounded-2xl px-4 py-3">
+              <Search size={18} className="shrink-0 text-gray-300" />
+              <input
+                autoFocus
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="搜索款式、工艺、颜色…"
+                className="w-full bg-transparent text-sm text-white placeholder-gray-400 outline-none"
+              />
+              <button type="submit" className="rounded-full bg-white px-4 py-1.5 text-xs font-medium text-black transition-colors hover:bg-gray-200">搜索</button>
+              <button type="button" onClick={() => setSearchOpen(false)} className="liquid-glass rounded-full px-3 py-1.5 text-xs text-white">关闭</button>
+            </form>
+          </div>
+        )}
+
+        {/* ===== 移动端侧边菜单 ===== */}
+        <div
+          className={`absolute left-0 right-0 top-[72px] z-40 border-y border-gray-700/50 bg-gray-900/95 shadow-2xl shadow-black/60 backdrop-blur-md transition-all duration-500 ease-out lg:hidden ${
+            menuOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-1 opacity-0'
+          }`}
+        >
+          <div className="flex flex-col px-3 py-2">
+            {NAV_LINKS.map((link, i) => (
+              <a
+                key={link}
+                href="#"
+                onClick={e => { e.preventDefault(); setMenuOpen(false); setNavActive(link); showToast(`「${link}」：内容建设中，敬请期待`); }}
+                className={`rounded px-3 py-3 text-sm text-white transition-colors hover:bg-white/5 ${
+                  menuOpen ? 'animate-slide-in-left' : ''
+                }`}
+                style={menuOpen ? { animationDelay: `${i * 50}ms` } : undefined}
+              >
+                {link}
+              </a>
+            ))}
+          </div>
+
+          <div className={`border-t border-gray-700/50 px-3 py-3 sm:hidden ${menuOpen ? 'animate-slide-in-left' : ''}`}
+               style={menuOpen ? { animationDelay: '250ms' } : undefined}>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); setSearchOpen(true); }}
+                className="liquid-glass flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm text-white"
+              >
+                <Search size={18} />
+                <span>搜索</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); showToast('个人中心：登录与订单功能建设中'); }}
+                className="liquid-glass flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full px-3 py-2 text-sm text-white"
+              >
+                <User size={18} />
+                <span>个人中心</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== 主视觉文案区 ===== */}
+        <main className="relative z-10 flex min-h-0 flex-1 flex-col justify-end px-4 pb-8 sm:px-6 md:px-12 md:pb-16">
+          <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+
+            <div className="min-w-0 flex-1" key={slideKey}>
+              <div className="animate-content-in mb-6 flex flex-wrap items-center gap-3 text-sm sm:gap-6 sm:text-base md:mb-8">
+                <span className="flex items-center gap-1.5">
+                  <Star size={16} className="h-4 w-4 fill-white text-white sm:h-5 sm:w-5" />
+                  <span>{product.meta1}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock size={16} />
+                  <span>{product.meta2}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Calendar size={16} />
+                  <span>{product.meta3}</span>
+                </span>
+              </div>
+
+              <h1 className="animate-content-in mb-2 text-3xl font-normal tracking-[-0.04em] sm:text-5xl md:mb-4 md:text-6xl lg:text-7xl">
+                {product.tagline}
+              </h1>
+              <p className="animate-content-in mb-4 flex flex-wrap items-center gap-x-3 text-sm font-medium tracking-[0.18em] text-gray-300 md:mb-6 md:text-base">
+                <span>{product.name} · {product.price}</span>
+                <span className="flex items-center gap-1 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-normal tracking-normal text-gray-300 md:text-xs">
+                  <Shirt size={12} />
+                  {product.videoNote}
+                </span>
+              </p>
+
+              <p className="animate-content-in mb-6 max-w-2xl text-base text-gray-400 sm:text-lg md:mb-12 md:text-xl">
+                {product.desc}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <button
+                  type="button"
+                  onClick={() => showToast(`「${product.name}」定制工坊：即将上线，先收藏款式`)}
+                  className="animate-content-in flex cursor-pointer items-center gap-2 rounded-full bg-white px-6 py-2.5 font-medium text-black transition-colors duration-300 hover:bg-gray-200 sm:px-8 sm:py-3"
+                >
+                  <Play size={18} className="fill-black" />
+                  <span>立即定制</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => showToast(`「${product.name}」详情页：工艺参数与尺码表建设中`)}
+                  className="animate-content-in liquid-glass flex cursor-pointer items-center gap-2 rounded-full px-6 py-2.5 text-white sm:px-8 sm:py-3"
+                >
+                  <Sparkles size={18} />
+                  <span>了解详情</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 款式指示点 */}
+          <div className="mt-6 flex items-center justify-center gap-2 md:mt-8">
+            {PRODUCTS.map((p, i) => (
+              <button
+                key={p.name}
+                type="button"
+                aria-label={`切换到 ${p.name}`}
+                disabled={!!anim}
+                onClick={() => { if (i !== productIdx) goProduct(i > productIdx ? 1 : -1); }}
+                className={`dot h-1.5 cursor-pointer rounded-full disabled:cursor-wait ${
+                  i === productIdx ? 'w-8 bg-white' : 'w-1.5 bg-white/30 hover:bg-white/60'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* 切换款式按钮组：页面最底部居中，4K 加载提示紧贴其上方 */}
+          <div className="relative mt-5 flex items-center justify-center gap-2 md:mt-6">
+            {videoLoading && (
+              <div className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[3] -translate-x-1/2">
+                <span className="loading-hint block whitespace-nowrap rounded-full bg-black/50 px-3 py-1 text-xs text-white/70 backdrop-blur-sm">
+                  正在载入 4K 影片…
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              aria-label="上一款式"
+              onClick={() => goProduct(-1)}
+              disabled={!!anim}
+              className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center rounded-full px-4 py-2.5 text-white sm:px-6 sm:py-3 disabled:cursor-wait disabled:opacity-60"
+              style={{ animationDelay: '800ms' }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label="下一款式"
+              onClick={() => goProduct(1)}
+              disabled={!!anim}
+              className="animate-blur-fade-up liquid-glass flex cursor-pointer items-center rounded-full px-4 py-2.5 text-white sm:px-6 sm:py-3 disabled:cursor-wait disabled:opacity-60"
+              style={{ animationDelay: '900ms' }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </main>
+
+        {/* ===== Toast ===== */}
+        {toast && (
+          <div key={toast.id} className="animate-toast-in fixed bottom-6 left-1/2 z-[60] -translate-x-1/2">
+            <div className="liquid-glass flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm text-white">
+              <Shirt size={16} className="text-gray-200" />
+              <span className="max-w-[70vw] truncate whitespace-nowrap">{toast.msg}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
